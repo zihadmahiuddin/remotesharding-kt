@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import io.netty.channel.ChannelInitializer as NettyChannelInitializer
 
+internal typealias ShardManagerBuildHandler = (ShardManager) -> Unit
+
 class Client(
   private val shardManagerBuilder: DefaultShardManagerBuilder,
   private val address: String,
@@ -40,12 +42,17 @@ class Client(
 
   private lateinit var shardManager: ShardManager
 
+  private val onBuildListeners = mutableSetOf<ShardManagerBuildHandler>()
+
   internal fun buildShardManager() {
     shardManager = shardManagerBuilder
       .setShardsTotal(session!!.shardCount)
       .setShards()
       .addEventListeners(JDAEventListener(this))
       .build(false)
+    onBuildListeners.forEach {
+      it(shardManager)
+    }
   }
 
   fun start() {
@@ -80,6 +87,11 @@ class Client(
         eventGroup.shutdownGracefully()
       }
     }
+  }
+
+  @Suppress("UNUSED")
+  fun onShardManagerBuild(handler: ShardManagerBuildHandler) {
+    onBuildListeners.add(handler)
   }
 
   internal fun startShard(shardId: Int) {
