@@ -14,6 +14,6 @@ internal class ClientSideSession(
     super.channelActive(ctx)
 
     logger.debug("Initializing Session with ${ctx.channel().remoteAddress()}")
-    sendMessage(HandshakeRequestMessage())
+    sendMessage(HandshakeRequestMessage().apply { shardCapacity = client.shardCapacity.toShort() })
   }
 }

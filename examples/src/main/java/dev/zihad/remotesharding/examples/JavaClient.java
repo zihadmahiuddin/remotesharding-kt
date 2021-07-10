@@ -26,11 +26,17 @@ public class JavaClient extends ListenerAdapter {
     String botToken = Optional.ofNullable(System.getenv("BOT_TOKEN")).orElseThrow(() -> new Exception("Bot token must be provided"));
     String encryptionKey = Optional.ofNullable(System.getenv("ENCRYPTION_KEY")).orElseThrow(() -> new Exception("Encryption key must be provided"));
 
+    int shardCapacity = 1;
+    try {
+      shardCapacity = Integer.parseInt(System.getenv("SHARD_CAPACITY"));
+    } catch (NumberFormatException ignored) {
+    }
+
     DefaultShardManagerBuilder shardManagerBuilder = DefaultShardManagerBuilder.createLight(botToken)
         .setActivity(Activity.playing("Testing"))
         .addEventListeners(new JavaClient());
 
-    Client client = new Client(shardManagerBuilder, address, port, botToken, encryptionKey);
+    Client client = new Client(shardManagerBuilder, address, port, botToken, encryptionKey, shardCapacity);
     client.start();
   }
 

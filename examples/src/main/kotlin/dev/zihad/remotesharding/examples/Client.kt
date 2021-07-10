@@ -14,13 +14,14 @@ object Client : ListenerAdapter() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 5252
     val botToken = System.getenv("BOT_TOKEN") ?: throw Exception("Token must be provided")
     val encryptionKey = System.getenv("ENCRYPTION_KEY") ?: throw Exception("Encryption be provided")
+    val shardCapacity = System.getenv("SHARD_CAPACITY")?.toIntOrNull() ?: 1
 
     repeat(1) {
       val shardManagerBuilder = DefaultShardManagerBuilder.createLight(botToken)
         .setActivity(Activity.playing("Testing"))
         .addEventListeners(this)
 
-      val client = Client(shardManagerBuilder, host, port, botToken, encryptionKey)
+      val client = Client(shardManagerBuilder, host, port, botToken, encryptionKey, shardCapacity)
       client.start()
     }
   }

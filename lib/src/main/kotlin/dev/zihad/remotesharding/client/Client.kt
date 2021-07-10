@@ -1,13 +1,11 @@
 package dev.zihad.remotesharding.client
 
-import dev.zihad.remotesharding.messages.client.HandshakeRequestMessage
 import dev.zihad.remotesharding.messages.client.IdentifySentMessage
 import dev.zihad.remotesharding.util.netty.NettyUtils
 import dev.zihad.remotesharding.util.netty.handlers.ExceptionHandler
 import dev.zihad.remotesharding.util.netty.handlers.MessageDecoder
 import dev.zihad.remotesharding.util.netty.handlers.MessageEncoder
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.socket.SocketChannel
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.GenericEvent
@@ -25,8 +23,9 @@ class Client(
   private val port: Int,
   private val botToken: String,
   private val encryptionKey: String,
-  private val shardCapacity: Int = 1
+  internal val shardCapacity: Int = 1
 ) {
+  @Suppress("UNUSED")
   constructor(
     shardManagerBuilder: DefaultShardManagerBuilder,
     address: String,
@@ -92,20 +91,12 @@ class Client(
       if (event is StatusChangeEvent) {
         if (event.oldStatus == JDA.Status.IDENTIFYING_SESSION && event.newStatus == JDA.Status.AWAITING_LOGIN_CONFIRMATION) {
           client.session!!.sendMessage(IdentifySentMessage().apply { shardId = event.jda.shardInfo.shardId.toShort() })
-          client.shardManager.removeEventListener(this)
         }
       }
     }
   }
 
   internal class ChannelHandler(private val client: Client) : NettyChannelInitializer<SocketChannel>() {
-    override fun channelActive(ctx: ChannelHandlerContext) {
-      super.channelActive(ctx)
-
-      logger.debug("Initializing Session with ${ctx.channel().remoteAddress()}")
-      client.session?.sendMessage(HandshakeRequestMessage().apply { shardCapacity = client.shardCapacity.toShort() })
-    }
-
     override fun initChannel(ch: SocketChannel) {
       client.session = ClientSideSession(ch, client, client.botToken)
       client.session!!.shardCapacity = client.shardCapacity
