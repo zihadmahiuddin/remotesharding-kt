@@ -41,6 +41,7 @@ internal class MessageDecoder(private val session: Session, aesSecretKey: String
         val decryptedByteBuf = ctx.alloc().buffer()
         decryptedByteBuf.writeBytes(decryptedBytes)
         message.decode(decryptedByteBuf)
+        decryptedByteBuf.release()
       } else {
         message.decode(`in`)
       }
