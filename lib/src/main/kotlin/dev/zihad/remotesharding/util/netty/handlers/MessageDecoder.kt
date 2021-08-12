@@ -52,6 +52,9 @@ internal class MessageDecoder(private val session: Session, aesSecretKey: String
           .apply { id = messageId }) // Must add something to the list, so we add an instance of UnknownMessage
     }
     val bytesLeftToRead = (length + Constants.HEADER_LENGTH) - `in`.readerIndex()
-    `in`.skipBytes(bytesLeftToRead)
+    if (bytesLeftToRead > 0) `in`.skipBytes(bytesLeftToRead)
+    else { // it should never be less than 0 unless the client is sending invalid packets? assuming this connection is broken.
+      ctx.close()
+    }
   }
 }
