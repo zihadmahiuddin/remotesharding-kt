@@ -12,6 +12,7 @@ import io.netty.channel.socket.SocketChannel
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.properties.Delegates
@@ -24,6 +25,11 @@ class Server(
   private val encryptionKey: String,
   private val providedShardCount: Int? = null
 ) {
+  val remoteAddresses: List<SocketAddress>
+    get() {
+      return connectedClients.map { it.key.remoteAddress() }
+    }
+
   internal var totalShardCount by Delegates.notNull<Int>()
 
   internal val buckets by lazy { Array(gatewayInfo.sessionStartLimit.maxConcurrency) { Bucket(it) } }
