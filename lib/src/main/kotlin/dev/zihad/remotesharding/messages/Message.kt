@@ -16,7 +16,6 @@ internal abstract class Message {
 
   open fun decode(byteBuf: ByteBuf) {}
   open fun encode(byteBuf: ByteBuf) {}
-  open fun processSend() {}
   open fun processReceive() {}
 
   companion object Factory : HashMap<Short, KClass<out Message>>() {

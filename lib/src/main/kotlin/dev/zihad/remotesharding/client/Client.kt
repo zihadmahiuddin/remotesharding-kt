@@ -5,6 +5,7 @@ import dev.zihad.remotesharding.util.netty.NettyUtils
 import dev.zihad.remotesharding.util.netty.handlers.ExceptionHandler
 import dev.zihad.remotesharding.util.netty.handlers.MessageDecoder
 import dev.zihad.remotesharding.util.netty.handlers.MessageEncoder
+import dev.zihad.remotesharding.util.netty.handlers.Session
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.socket.SocketChannel
 import net.dv8tion.jda.api.JDA
@@ -102,7 +103,11 @@ class Client(
     override fun onEvent(event: GenericEvent) {
       if (event is StatusChangeEvent) {
         if (event.oldStatus == JDA.Status.IDENTIFYING_SESSION && event.newStatus == JDA.Status.AWAITING_LOGIN_CONFIRMATION) {
-          client.session!!.sendMessage(IdentifySentMessage().apply { shardId = event.jda.shardInfo.shardId.toShort() })
+          client.session!!.apply {
+            state = Session.State.IdentifySent
+            logger.info("Shard is ready")
+            sendMessage(IdentifySentMessage().apply { shardId = event.jda.shardInfo.shardId.toShort() })
+          }
         }
       }
     }

@@ -4,9 +4,12 @@ import dev.zihad.remotesharding.messages.Message
 import dev.zihad.remotesharding.messages.server.LoginFailedMessage
 import dev.zihad.remotesharding.messages.server.LoginOkMessage
 import dev.zihad.remotesharding.server.ServerSideSession
+import dev.zihad.remotesharding.util.netty.handlers.Session
 import dev.zihad.remotesharding.util.netty.readIString
 import dev.zihad.remotesharding.util.netty.writeIString
 import io.netty.buffer.ByteBuf
+import io.netty.handler.timeout.ReadTimeoutHandler
+import java.util.concurrent.TimeUnit
 
 internal class LoginMessage : Message() {
   override val id: Short = 102
@@ -37,6 +40,11 @@ internal class LoginMessage : Message() {
             it.server.queuedShardIds.addAll(v)
             it.server.buckets[k].queueShard(it, v)
           }
+        }
+        session.let { session ->
+          session.state = Session.State.Login
+          session.channel?.pipeline()
+            ?.addBefore("Session", "ReadTimeoutHandler", ReadTimeoutHandler(1, TimeUnit.MINUTES))
         }
         it.sendMessage(LoginOkMessage())
       }

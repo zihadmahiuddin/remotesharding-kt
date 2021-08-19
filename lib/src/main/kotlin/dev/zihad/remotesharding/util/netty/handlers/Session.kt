@@ -61,7 +61,6 @@ internal abstract class Session(
     super.write(ctx, msg, promise)
     if (msg is Message) {
       msg.session = this
-      msg.processSend()
     }
   }
 

@@ -41,9 +41,4 @@ internal class HandshakeRequestMessage : Message() {
       }
     }
   }
-
-  override fun processSend() {
-    session.state = Session.State.Handshake
-    session.logger.debug("Handshake request sent!")
-  }
 }

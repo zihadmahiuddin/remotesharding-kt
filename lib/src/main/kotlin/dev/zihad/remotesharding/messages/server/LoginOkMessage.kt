@@ -9,13 +9,6 @@ import java.util.concurrent.TimeUnit
 internal class LoginOkMessage : Message() {
   override val id: Short = 202
 
-  override fun processSend() {
-    session.let { session ->
-      session.state = Session.State.Login
-      session.channel?.pipeline()?.addBefore("Session", "ReadTimeoutHandler", ReadTimeoutHandler(1, TimeUnit.MINUTES))
-    }
-  }
-
   override fun processReceive() {
     session.let { session ->
       session.state = Session.State.Login

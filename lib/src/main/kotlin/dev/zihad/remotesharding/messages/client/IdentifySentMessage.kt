@@ -31,9 +31,4 @@ internal class IdentifySentMessage : Message() {
       }
     }
   }
-
-  override fun processSend() {
-    session.state = Session.State.IdentifySent
-    session.logger.info("Shard is ready")
-  }
 }

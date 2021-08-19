@@ -17,15 +17,9 @@ internal class ShardInfoMessage : Message() {
   override fun encode(byteBuf: ByteBuf) {
     byteBuf.writeInt(shardId)
   }
-
-  override fun processSend() {
-    session.shardIds.add(shardId)
-    session.logger = LoggerFactory.getLogger("Session-${session.shardIds.joinToString(",")}")
-  }
-
+  
   override fun processReceive() {
     session.shardIds.add(shardId)
-    session.logger = LoggerFactory.getLogger("Session-${session.shardIds}")
     (session as ClientSideSession).client.startShard(shardId)
   }
 }

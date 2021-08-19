@@ -36,11 +36,14 @@ internal class Bucket(private val id: Int) : Runnable {
     synchronized(queuedShards) {
       val nextShardToProcess = queuedShards.keys.firstOrNull() ?: return
       logger.debug("Processing shard $nextShardToProcess")
-      queuedShards[nextShardToProcess]?.sendMessage(
-        ShardInfoMessage().apply {
-          shardId = nextShardToProcess
-        }
-      )
+      queuedShards[nextShardToProcess]?.apply {
+        shardIds.add(nextShardToProcess)
+        sendMessage(
+          ShardInfoMessage().apply {
+            shardId = nextShardToProcess
+          }
+        )
+      }
       queuedShards.remove(nextShardToProcess)
       canProcessNextShard = false
     }
