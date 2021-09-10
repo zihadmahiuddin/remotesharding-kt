@@ -37,6 +37,7 @@ internal class LoginMessage : Message() {
             (freeShardIds - it.server.queuedShardIds).take(it.shardCapacity)
           val nextShardIdsGroupedByBucket = nextShardIds.groupBy { shardId -> shardId % it.server.buckets.size }
           nextShardIdsGroupedByBucket.forEach { (k, v) ->
+            it.queuedShardIds.addAll(v)
             it.server.queuedShardIds.addAll(v)
             it.server.buckets[k].queueShard(it, v)
           }

@@ -24,6 +24,12 @@ internal class Bucket(private val id: Int) : Runnable {
     logger.debug("Queued shards ${queuedShards.keys.joinToString(", ") { it.toString() }} on bucket $id")
   }
 
+  fun dequeueShard(shardId: Int) {
+    synchronized(queuedShards) {
+      queuedShards.remove(shardId)
+    }
+  }
+
   fun scheduleProcessingNextShard() {
     scheduledExecutorService.schedule({
       canProcessNextShard = true

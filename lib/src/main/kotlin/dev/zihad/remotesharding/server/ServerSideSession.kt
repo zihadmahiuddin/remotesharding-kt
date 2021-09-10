@@ -10,13 +10,22 @@ internal class ServerSideSession(
   botToken: String,
   override var shardCount: Int
 ) : Session(channel, botToken) {
+  internal val queuedShardIds = mutableListOf<Int>()
+
+  override fun channelActive(ctx: ChannelHandlerContext) {
+    super.channelActive(ctx)
+    logger.info("Client ${channel?.remoteAddress()} connected.")
+  }
 
   override fun channelInactive(ctx: ChannelHandlerContext) {
     if (state >= State.Login) {
       synchronized(server) {
         shardIds.forEach {
+          server.buckets[it % server.buckets.size].dequeueShard(it)
           server.connectedShards[it] = null
         }
+        server.queuedShardIds.removeAll(queuedShardIds)
+        queuedShardIds.clear()
         server.connectedClients.remove(channel)
       }
       logger.info("Client ${channel?.remoteAddress()}[${shardIds}] disconnected.")
