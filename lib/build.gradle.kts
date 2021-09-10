@@ -1,7 +1,7 @@
 plugins {
   `java-library`
   kotlin("jvm")
-  kotlin("plugin.serialization") version "1.5.0"
+  kotlin("plugin.serialization") version "1.5.30"
   `maven-publish`
 }
 
@@ -9,10 +9,10 @@ val projectGroupId = "dev.zihad"
 val projectArtifactId = "remotesharding"
 val projectVersion = "1.0.2"
 
-val jdaVersion = "4.3.0_295"
-val kotlinxCoroutinesVersion = "1.5.0"
-val kotlinxSerializationVersion = "1.2.1"
-val ktorVersion = "1.6.0"
+val jdaVersion = "4.3.0_324"
+val kotlinxCoroutinesVersion = "1.5.2"
+val kotlinxSerializationVersion = "1.2.2"
+val ktorVersion = "1.6.3"
 val nettyVersion = "4.1.65.Final"
 val slf4jVersion = "1.7.31"
 
