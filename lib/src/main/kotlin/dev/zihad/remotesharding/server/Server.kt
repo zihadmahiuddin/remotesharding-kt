@@ -12,7 +12,6 @@ import io.netty.channel.socket.SocketChannel
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
-import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.properties.Delegates
@@ -25,17 +24,15 @@ class Server(
   private val encryptionKey: String,
   private val providedShardCount: Int? = null
 ) {
-  val remoteAddresses: List<SocketAddress>
-    get() {
-      return connectedClients.map { it.key.remoteAddress() }
-    }
-
   internal var totalShardCount by Delegates.notNull<Int>()
 
   internal val buckets by lazy { Array(gatewayInfo.sessionStartLimit.maxConcurrency) { Bucket(it) } }
   internal val connectedClients = mutableMapOf<Channel, ServerSideSession>()
   internal val connectedShards by lazy { arrayOfNulls<ServerSideSession>(totalShardCount) }
-  internal val queuedShardIds = mutableListOf<Int>()
+  internal val queuedShardIds: Set<Int>
+    get() {
+      return buckets.flatMap { it.queuedShards.keys }.toSet()
+    }
 
   private val serverCoroutineScope = CoroutineScope(Executors.newCachedThreadPool().asCoroutineDispatcher())
 
@@ -43,6 +40,18 @@ class Server(
 
   fun start() {
     runBlocking {
+      serverCoroutineScope.launch {
+        for ((channel, session) in connectedClients) {
+          if (
+            session.lastHeartbeatAt != null &&
+            session.lastHeartbeatAt!! + 15000 < System.currentTimeMillis()
+          ) {
+            channel.close()
+          }
+        }
+        delay(5000)
+      }
+
       serverCoroutineScope.launch {
         gatewayInfo = DiscordGatewayUtils.getGatewayInfo(botToken)
         totalShardCount = if (providedShardCount == null || providedShardCount == 0)

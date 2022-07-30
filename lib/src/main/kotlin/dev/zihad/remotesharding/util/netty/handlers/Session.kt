@@ -13,6 +13,8 @@ internal abstract class Session(
 
   var logger = LoggerFactory.getLogger(Session::class.java)!!
 
+  var lastHeartbeatAt: Long? = null
+
   enum class State {
     None,
     Handshake,

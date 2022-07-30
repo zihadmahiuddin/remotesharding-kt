@@ -22,12 +22,14 @@ internal class IdentifySentMessage : Message() {
     session.state = Session.State.IdentifySent
     session.logger.info("Client ${session.channel?.remoteAddress()}[${session.shardIds}] has sent IDENTIFY")
 
-    (session as? ServerSideSession)?.let {
+    (session as? ServerSideSession)?.let { session ->
       val shardIdInt = shardId.toInt()
-      synchronized(it.server) {
-        it.server.buckets[shardIdInt % it.server.buckets.size].scheduleProcessingNextShard()
-        it.server.connectedShards[shardIdInt] = it
-        it.server.queuedShardIds.remove(shardIdInt)
+      synchronized(session.server) {
+        session.server.buckets[shardIdInt % session.server.buckets.size].let { bucket ->
+          bucket.scheduleProcessingNextShard()
+          bucket.dequeueShard(shardIdInt)
+        }
+        session.server.connectedShards[shardIdInt] = session
       }
     }
   }

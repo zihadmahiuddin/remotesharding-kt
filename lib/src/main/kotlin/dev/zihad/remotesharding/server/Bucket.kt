@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 
 internal class Bucket(private val id: Int) : Runnable {
   private val scheduledExecutorService by lazy { Executors.newSingleThreadScheduledExecutor() }
-  private val queuedShards = mutableMapOf<Int, ServerSideSession>()
+  internal val queuedShards = mutableMapOf<Int, ServerSideSession>()
 
   private var canProcessNextShard = true
 

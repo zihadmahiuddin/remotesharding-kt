@@ -7,5 +7,6 @@ internal class HeartbeatMessage : Message() {
 
   override fun processReceive() {
     session.logger.debug("Heartbeat received")
+    session.lastHeartbeatAt = System.currentTimeMillis()
   }
 }
